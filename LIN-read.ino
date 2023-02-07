@@ -19,33 +19,36 @@ void setup()
   pinMode(BUTTON_PIN, INPUT);
 }
 int bits=0, byte_num=0;
-int zero1=800, zero2=1100, one1=400, one2=600;
+int zero1=800, zero2=1100, one1=370, one2=600;
 //int zero1=350, zero2=430, one1=180, one2=220;
 
 void loop()
 {
-  unsigned long duration = pulseIn(BUTTON_PIN, LOW);
-  if(duration>50000) {
+  unsigned long duration = pulseIn(BUTTON_PIN, HIGH,50000);
+  if(duration==0) {       //If 50ms second passed and we got no HIGH pulse, this means that burst of data has ended. So do all printing and stuff
     Serial.print(bits);
     for (int i=0;i<12;i++){Serial.print(","); Serial.print(mybytes[i],HEX); }
     Serial.print(",");
-    Serial.println(duration);
+    Serial.println(val);
     //Serial.print(val,HEX); 
   //Serial.print(",");  Serial.print(zeros); Serial.print(","); Serial.println(ones);
   val=0; byte_num=0; bits=0;}
-  else if (duration<one2 and duration>one1) {
+  else if (duration<one2 and duration>one1) {     //If HIGH duration is in this range, this is 0
     //Serial.print("0"); 
-    val <<= 1; val|=1; 
+    val <<= 1; //val|=1; 
     bits++;}
-  else if (duration<zero2 and duration>zero1) {
+  else if (duration<zero2 and duration>zero1) {     //If HIGH duration is in this range, this is 1
     //Serial.print("1");
-    val <<= 1;  bits++;}
+    val <<= 1;  val|=1;
+    bits++;}
   else {
     Serial.print("Error:"); Serial.println(duration);}
   if(bits%8==0 and bits!=0){
     //Serial.print("Byte:");
     //Serial.println(val);
-    mybytes[byte_num] = val; byte_num++;
+    
+    mybytes[byte_num] = val;
+    byte_num++;
     val = B0;
   }
 }
